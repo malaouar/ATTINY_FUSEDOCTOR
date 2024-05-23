@@ -69,5 +69,3 @@ V3:
 V4:
 	V3 + Restore default Fuses
 
-	![Screenshot](circuit.JPG)
-	![Screenshot](HVSP.JPG)
