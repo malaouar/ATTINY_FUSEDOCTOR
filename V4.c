@@ -1,6 +1,6 @@
 /******************************************************************************
 V4: 
-	* Detects ATtiny type and displays it's name and default and current Fuses
+	* Detects ATtiny type and displays it's name, default and current Fuses
 	* Restores default fuses
 Tested with ATTINY85 on WIN11
 *******************************************************************************/
@@ -116,7 +116,7 @@ void uSleep(int waitTime){
 inline void clockit(void){
 	bbb |= (SCI);						// SCI bit = 1
 	FT_Write(handle, &bbb, 1, &bytes);	// send 1 byte 	
-	//uSleep(1);						// NOT needed in Windows!
+	//uSleep(1);						// Try without it
 	bbb &= ~(SCI);						// SCI bit = 0
 	FT_Write(handle, &bbb, 1, &bytes);	// send 1 byte 
 }
@@ -136,7 +136,7 @@ unsigned char transferByte(unsigned char data, unsigned char instruction){
 		// read one bit form SDO
 		byteRead <<= 1;  				// shift one bit, this clears LSB	
 		FT_GetBitMode(handle, &stat);	// read pins
-		if(stat & SDO) byteRead |= 1;	// set LSB
+		if(stat & SDO) byteRead |= 1;	// If SDO high set LSB
 				
 		// output next data bit on SDI
 		if(data & 0x80) bbb |= SDI; 	// set SDI
@@ -200,7 +200,7 @@ int main(void){
     unsigned char device, val;  			// device ID and a var to read signature or fuse value
 	unsigned char sig0, sig1, sig2;  		// sig bytes
 	 
-    printf("FT232RL ATTINY TYPE DETECTOR AND FUSE READER!!\r\n");
+    printf("FT232RL ATTINY FUSE DOCTOR!!\r\n");
 
     // Initialize and open the device
     if(FT_Open(0, &handle) != FT_OK) {
@@ -264,24 +264,24 @@ int main(void){
 		printf(" HFuse = 0X%02X,", val);
 		val = readFuse(0x6A, 0x6E);		// Extended Fuse
 		printf(" EFuse = 0X%02X\r\n", val);
+		
+		// Restore default fuses 
+		printf("Restoring default fuses .....");
+		writeFuse(targetCpu[device].fuseLow, 0x64, 0x6C);
+		writeFuse(targetCpu[device].fuseHigh, 0x74, 0x7C);
+		if(targetCpu[device].fuseExtended !=0) writeFuse(targetCpu[device].fuseExtended, 0x66, 0x6E);	
+		printf("...Done!!\r\n");
+
+		// verify
+		printf("Verifying .....");
+		if((targetCpu[device].fuseLow == readFuse(0x68, 0x6C)) && (targetCpu[device].fuseHigh == readFuse(0x7A, 0x7E)) && (targetCpu[device].fuseExtended == readFuse(0x6A, 0x6E))) printf("... SUCCESS!!!! \r\n");
+		else printf(".. Oooops!!!!!!!!!!!\r\n");
 	}
 	else{
 		printf("Unknown device!!\r\n");
 		// Display Signature:
 		printf("Signature = 0X%02X%02X%02X\r\n", sig0, sig1, sig2);
 	}
-
-	// Restore default fuses 
-	printf("Restoring default fuses .....");
-	writeFuse(targetCpu[device].fuseLow, 0x64, 0x6C);
-	writeFuse(targetCpu[device].fuseHigh, 0x74, 0x7C);
-	if(targetCpu[device].fuseExtended !=0) writeFuse(targetCpu[device].fuseExtended, 0x66, 0x6E);	
-	printf("...Done!!\r\n");
-
-	// verify
-	printf("Verifying .....");
-	if((targetCpu[device].fuseLow == readFuse(0x68, 0x6C)) && (targetCpu[device].fuseHigh == readFuse(0x7A, 0x7E)) && (targetCpu[device].fuseExtended == readFuse(0x6A, 0x6E))) printf("... SUCCESS!!!! \r\n");
-    else printf(".. Oooops!!!!!!!!!!!\r\n");
 
 	//6. Exit Programming mode by bringing RESET pin to 0V.
 	bbb = RST;			// RST bit =1, clear all others							
