@@ -27,7 +27,7 @@ How to build:
 * Download FT232RL D2XX driver and Extract it.
 * Connect FT232RL to PC and Install the driver.
 * Install MINGW Developer STUDIO.
-* Install D2XX libirary in MingW DS:
+* Install D2XX library in MingW DS:
 	- copy ftd2xx.h  from FTDI-2XX_v2.12.28_X86\X64 to C:\Program Files (x86)\MinGWStudio\MinGW\include
 	- copy ftd2xx.lib FTDI-2XX_v2.12.28_X86\X64\i386 to C:\Program Files (x86)\MinGWStudio\MinGW\lib
 * Open the source code version you want by a text editor and save it as "main.c"
